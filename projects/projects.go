@@ -19,7 +19,7 @@ type ProjectStore interface {
 	GetProject(title string) (*Project, error)
 	CreateProject(p *Project) error
 	UpdateProject(p *Project) (*Project, error)
-	DeleteProject(title string) (*Project, error)
+	DeleteProject(title string) error
 }
 
 type InMemoryProjectStore struct {
