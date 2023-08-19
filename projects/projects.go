@@ -5,7 +5,10 @@ import (
 	"fmt"
 )
 
-var ErrBlankTitle = errors.New("project title cannot be blank")
+var (
+	ErrBlankTitle      = errors.New("project title cannot be blank")
+	ErrProjectNotFound = errors.New("project title not found")
+)
 
 type Project struct {
 	Title        string  `json:"title"`
@@ -15,6 +18,7 @@ type Project struct {
 }
 
 type ProjectStore interface {
+	Init(projects []*Project)
 	GetAllProjects() []*Project
 	GetProject(title string) (*Project, error)
 	CreateProject(p *Project) error
@@ -33,6 +37,7 @@ func NewInMemoryProjectStore() *InMemoryProjectStore {
 	}
 }
 
+// Allows loading of existing projects from somewhere else in memory
 func (store *InMemoryProjectStore) Init(projects []*Project) {
 
 	for _, p := range projects {
@@ -59,7 +64,7 @@ func (store *InMemoryProjectStore) GetProject(title string) (*Project, error) {
 		return p, nil
 	}
 
-	return nil, fmt.Errorf("no project with title %v", title)
+	return nil, ErrProjectNotFound
 }
 
 func (store *InMemoryProjectStore) CreateProject(p *Project) error {
@@ -102,7 +107,7 @@ func (store *InMemoryProjectStore) UpdateProject(p *Project) (*Project, error) {
 	}
 
 	// If title does not exist
-	return nil, fmt.Errorf("project with title %v does not exist", p.Title)
+	return nil, ErrProjectNotFound
 }
 
 func (store *InMemoryProjectStore) DeleteProject(title string) error {

@@ -1,13 +1,13 @@
 package main
 
 import (
+	"github.com/jeff-moorhead/houseProjects/cmd/app"
 	"github.com/labstack/echo/v4"
 )
 
 func main() {
 
 	e := echo.New()
-	// TODO: configure e with routes and initialize database access
-
-	e.Logger.Fatal(e.Start(":8080"))
+	a := app.NewApp(e)
+	a.Run(":8080")
 }
