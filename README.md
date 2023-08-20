@@ -39,5 +39,8 @@ Updates an existing project with the given title. Body must be JSON encoded.
 **DELETE: /projects/:title**
 Deletes the project with the given title.
 
+## License
+This software is free to use under the MIT license.
+
 ## Contact
 For more information, or to report issues, please email jeff.moorhead1@gmail.com.
