@@ -2,11 +2,11 @@ package projects
 
 import (
 	"errors"
-	"fmt"
 )
 
 var (
 	ErrBlankTitle      = errors.New("project title cannot be blank")
+	ErrTitleExists     = errors.New("cannot use existing title for new project")
 	ErrProjectNotFound = errors.New("project title not found")
 )
 
@@ -37,7 +37,7 @@ func NewInMemoryProjectStore() *InMemoryProjectStore {
 	}
 }
 
-// Allows loading of existing projects from somewhere else in memory
+// Allows loading of existing projects from somewhere else
 func (store *InMemoryProjectStore) Init(projects []*Project) {
 
 	for _, p := range projects {
@@ -75,7 +75,7 @@ func (store *InMemoryProjectStore) CreateProject(p *Project) error {
 
 	// Check if project title is already used
 	if _, ok := store.projects[p.Title]; ok {
-		return fmt.Errorf("cannot use existing title %v for new project", p.Title)
+		return ErrTitleExists
 	}
 
 	store.projects[p.Title] = p

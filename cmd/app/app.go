@@ -41,27 +41,71 @@ func NewApp(e *echo.Echo) *App {
 
 func (a *App) initRoutes() {
 
-	a.router.GET("/", func(c echo.Context) error {
+	a.router.GET("/projects", func(c echo.Context) error {
 		allProjects := a.database.GetAllProjects()
 		return c.JSON(http.StatusOK, allProjects)
 	})
 
-	a.router.GET("/:title", func(c echo.Context) error {
+	a.router.GET("/projects/:title", func(c echo.Context) error {
 		title := c.Param("title")
 		if title == "" {
-			return c.JSON(http.StatusBadRequest, errorResponse{
-				Message: projects.ErrBlankTitle.Error(),
-			})
+			return echo.NewHTTPError(http.StatusBadRequest, projects.ErrBlankTitle.Error())
 		}
 
 		proj, err := a.database.GetProject(c.Param("title"))
 		if errors.Is(err, projects.ErrProjectNotFound) {
-			return c.JSON(http.StatusNotFound, errorResponse{
-				Message: projects.ErrProjectNotFound.Error(),
-			})
+			return echo.NewHTTPError(http.StatusNotFound, projects.ErrProjectNotFound.Error())
 		}
 
 		return c.JSON(http.StatusOK, proj)
+	})
+
+	a.router.POST("/projects/new", func(c echo.Context) error {
+		newProject := new(projects.Project)
+		if err := c.Bind(newProject); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+
+		if newProject.Title == "" {
+			return echo.NewHTTPError(http.StatusBadRequest, projects.ErrBlankTitle.Error())
+		}
+
+		if err := a.database.CreateProject(newProject); err != nil {
+			if errors.Is(err, projects.ErrTitleExists) {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			} else {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+		}
+
+		return c.JSON(http.StatusCreated, newProject)
+	})
+
+	a.router.PUT("/projects/:title", func(c echo.Context) error {
+		project := new(projects.Project)
+		if err := c.Bind(project); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+
+		p, err := a.database.UpdateProject(project)
+		if err != nil {
+			if errors.Is(err, projects.ErrBlankTitle) || errors.Is(err, projects.ErrProjectNotFound) {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			} else {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+		}
+
+		return c.JSON(http.StatusOK, p)
+	})
+
+	a.router.DELETE("/projects/:title", func(c echo.Context) error {
+		title := c.Param("title")
+		if err := a.database.DeleteProject(title); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		return c.NoContent(http.StatusOK)
 	})
 }
 
