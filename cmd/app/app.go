@@ -1,7 +1,6 @@
 package app
 
 // TODO: configure logging for app router
-// TODO: add HTTP testing
 
 import (
 	"errors"
