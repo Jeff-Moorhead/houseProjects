@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/jeff-moorhead/houseProjects/projects"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"net/http"
 )
 
@@ -28,14 +29,25 @@ func NewApp(e *echo.Echo, db projects.ProjectStore) *App {
 			Title:        "Backyard Fence",
 			Cost:         2500.00,
 			DurationDays: 14,
-			Description:  "Fence in the back yard for a dog run",
+			Description: `Fence in the back yard for a dog run. This project will involve getting a dumpster
+for the garbage by the shed, moving a bunch of rocks out of the garden beds to take back some of our property,
+and removing the old picket fence that only serves a decorative purpose right now.`,
 		},
 	}
 
 	a.database.Init(baseProjects)
+	a.setCORS()
 	a.initRoutes()
 
 	return a
+}
+
+func (a *App) setCORS() {
+
+	// Allow cross-origin requests from the frontend server, which runs on Node at localhost:3000
+	a.router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost:3000"},
+	}))
 }
 
 func (a *App) initRoutes() {
