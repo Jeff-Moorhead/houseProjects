@@ -46,7 +46,7 @@ func (a *App) setCORS() {
 
 	// Allow cross-origin requests from the frontend server, which runs on Node at localhost:3000
 	a.router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:3000"},
+		AllowOrigins: []string{"http://localhost:3000", "http://localhost:81"},
 	}))
 }
 
@@ -103,6 +103,8 @@ func (a *App) createProject(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
+
+	c.Logger().Info(newProject)
 
 	return c.JSON(http.StatusCreated, newProject)
 }
